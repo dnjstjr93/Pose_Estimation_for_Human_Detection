@@ -55,9 +55,15 @@ if __name__ == '__main__':
     # Video reader
     cam = cv2.VideoCapture(video_file)
     input_fps = cam.get(cv2.CAP_PROP_FPS)
+    
+    print("Running at {} fps.".format(input_fps))
+
     ret_val, orig_image = cam.read()
     video_length = int(cam.get(cv2.CAP_PROP_FRAME_COUNT))
-
+    
+    width = orig_image.shape[1]
+    height = orig_image.shape[0]
+	
     if ending_frame is None:
         ending_frame = video_length
 
@@ -81,11 +87,23 @@ if __name__ == '__main__':
 
             # generate image with body parts
             all_peaks, subset, candidate = extract_parts(input_image, params, model, model_params)
+            #print('\nall_peaks : {}'.format(len(all_peaks)))
+            #print('candidate : {}'.format(len(candidate)))
             canvas = draw(orig_image, all_peaks, subset, candidate)
 
-            print('Processing frame: ', i)
+            if len(candidate) >= 8:
+                print('\n=================================')
+                print('            Detection              ')
+                print('=================================\n')
+
+            print('\nProcessing frame: ', i)
             toc = time.time()
             print('processing time is %.5f' % (toc - tic))
+            
+            cv2.imshow('result', canvas)
+            
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+              break
 
             out.write(canvas)
 
